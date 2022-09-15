@@ -1,0 +1,48 @@
+
+# name: k1-releaser
+# on:
+#   release:
+#     types: [created]
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#       - name: Generate Changelog
+#         run: echo "# Good things have arrived" > ${{ github.workspace }}-CHANGELOG.txt
+#       - name: Release Foo
+#         uses: softprops/action-gh-release@v1
+#         if: startsWith(github.ref, 'refs/tags/')
+#         with:
+#           body_path: ${{ github.workspace }}-CHANGELOG.txt
+#           token: ${{ secrets.GH_RELEASER_TOKEN }}
+#         env:
+#           GITHUB_REPOSITORY: AprendaCloud/foo
+
+name: k1-releaser
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  sync_docs:
+    name: Sync repos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current version
+        uses: actions/checkout@v2
+      - name: Create files to sync
+        run: |
+          touch VERSION.md
+          echo tagBAR > VERSION.md
+      - name: Sync with local action
+        uses: kai-tub/external-repo-sync-action@v1
+        with:
+          source-directory: "."
+          branch: "main"
+          repository: "AprendaCloud/foo"
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
